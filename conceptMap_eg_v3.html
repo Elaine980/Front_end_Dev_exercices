@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Concept Map</title>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<style>
+  .div{ margin: auto; width: 50%; height: 620px; border: 1px solid transparent;
+  text-align: center}
+  .hed{ margin: auto; width: 50%; height: 45px; border: 1px solid transparent;
+  text-align: center; text-indent: -1em}
+  </style>
+
+</head>
+<body>
+<h1 class="hed">Activity Plan</h1>
+<div class="div" id="div1"></div>
+
+<script type="text/javascript" src="conceptMap_func.js"></script>
+<script type="text/javascript">
+
+var activityPlan = ["Preparation", "Drilling", "Casing", "Cementing", "Evaluation"];
+
+var responsable = ["Emmanuel", "Hugo", "Mirco", "Jose", "Zhang", "Sebastien",
+"Kurosawa", "Hamza"];
+
+var engineering = ["Tool1", "Tool2", "Tool3", "Technic1", "Technic2", "Agreement1",
+"Agreement2"];
+
+var resPlan = [[1, 1, 0, 0, 1, 1, 0, 0],
+[0, 1, 1, 1, 0, 0, 0, 0],
+[1, 0, 0, 0, 1, 1, 0, 1],
+[0, 0, 1, 0, 0, 1, 1, 0],
+[1, 0, 0, 1, 1, 0, 0, 0]
+];
+
+var engPlan = [[1, 0, 0, 1, 0, 0, 0],
+[0, 1, 0, 1, 0, 0, 1],
+[1, 0, 1, 1, 1, 1, 0],
+[0, 0, 1, 0, 0, 1, 1],
+[0, 0, 1, 0, 1, 1, 1]
+];
+
+
+var width = 800;
+var height = 800;
+var svg = d3.select("#div1")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+var origin = [300,230];
+var padding = 5;
+var long = 100;
+var wide = 30;
+var R = 300;
+var r = 7;
+
+var myMap = getConceptMap(activityPlan, responsable, engineering, resPlan, engPlan,
+origin, padding, long, wide, R, r);
+
+console.log(myMap);
+
+var plannings = myMap[0];
+var circles = myMap[1];
+var lines = myMap[2];
+
+var gRect = svg.append("g");
+var gRing = svg.append("g");
+var gLine = svg.append("g");
+
+gRect.selectAll(".myrect")
+      .data(plannings)
+      .enter()
+      .append("rect")
+      .attr("fill","black")
+      .attr("stroke","black")
+      .attr("x", function(d){
+        return d.x;
+      })
+      .attr("y", function(d){
+        return d.y;
+      })
+      .attr("width", function(d){
+      return d.length;
+      })
+      .attr("height", function(d){
+        return d.width;
+      })
+      .on("mouseover", fadeRect(0.0, "over"))
+      .on("mouseout", fadeRect(1.0, "out"))
+      .on("click", goActivityPlan);
+
+//console.log(rect);
+gRect.selectAll(".textRect")
+      .data(plannings)
+      .enter()
+      .append("text")
+      .attr("class", "textRect")
+      .attr("fill","white")
+      .attr("font-size","12px")
+      .attr("text-anchor","middle")
+      .attr("x", function(d){
+      return d.x;
+      })
+      .attr("y", function(d){
+      return d.y;
+      })
+      .attr("dx", long/2)
+      .attr("dy","1.5em")
+      .text(function(d){
+      return d.name;
+      })
+      .on("mouseover", fadeRect(0.0, "over"))
+      .on("mouseout", fadeRect(1.0, "out"))
+      .on("click", goActivityPlan);
+
+
+gRing.selectAll(".mycircle")
+      .data(circles)
+      .enter()
+      .append("circle")
+      .attr("fill", "green")
+      .attr("stroke", "black")
+      .attr("cx", function(d){
+      return d.xCenter;
+      })
+      .attr("cy", function(d){
+      return d.yCenter;
+      })
+      .attr("r", function(d){
+      return d.rayon;
+      })
+      .on("mouseover", fadeRing(0.0, "over"))
+      .on("mouseout", fadeRing(1.0, "out"))
+      .on("click", goEngineer);
+
+//console.log(circle);
+gRing.selectAll(".textRing")
+      .data(circles)
+      .enter()
+      .append("text")
+      .attr("class", "textRing")
+      .attr("fill","red")
+      .attr("font-size","12px")
+      .attr("text-anchor", function(d){
+      if(d.position == "left"){
+      return "end";
+      }else{
+      return "start";
+      }
+      })
+      .attr("x", function(d){
+      return d.xCenter;
+      })
+      .attr("y", function(d){
+      return d.yCenter;
+      })
+      .attr("dx", function(d){
+      if(d.position == "left"){
+      return -r;
+      }else{
+      return r;
+      }
+      })
+      .attr("dy", 0)
+      //.attr("transform", function(d){
+      //var result = "rotate(" + (d.angle * 180 / Math.PI) + ")";
+
+      //return result;
+      //})
+      .text(function(d){
+      return d.name;
+      });
+
+
+  // draw lines
+var diagonal = d3.svg.diagonal();
+
+gLine.selectAll("path")
+      .data(lines)
+      .enter()
+      .append("path")
+      .attr("d",diagonal
+      .source(function(d){
+
+      return {"x": d.sourceX, "y": d.sourceY};
+      })
+      .target(function(d){
+
+      return {"x": d.targetX, "y": d.targetY};
+      }))
+      .attr("fill", "none")
+      .attr("stroke", "red")
+      .attr("stroke-width","2");
+
+
+</script>
+
+</body>
+</html>
+
+
+
+

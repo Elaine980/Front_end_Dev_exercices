@@ -1,0 +1,47 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>webDemo</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <servlet-name>LoginTestServlet</servlet-name>
+    <servlet-class>com.test.LoginTestServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LoginTestServlet</servlet-name>
+    <url-pattern>/loginTestServlet</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>RegisterTestServlet</servlet-name>
+    <servlet-class>com.login.test.RegisterTestServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RegisterTestServlet</servlet-name>
+    <url-pattern>/RegisterTestServlet</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>ProfileServlet</servlet-name>
+    <servlet-class>com.login.test.ProfileServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ProfileServlet</servlet-name>
+    <url-pattern>/ProfileServlet</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>ProcessShowServlet</servlet-name>
+    <servlet-class>com.login.test.ProcessShowServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ProcessShowServlet</servlet-name>
+    <url-pattern>/*ProcessShowServlet</url-pattern>
+ </servlet-mapping>
+
+</web-app>

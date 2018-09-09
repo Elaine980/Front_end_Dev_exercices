@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Concepet Map Implementation</title>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+</head>
+<body>
+<h1>Concept Map Example</h1>
+<script type="text/javascript">
+
+var activityPlan = ["Drilling3", "Casing3", "Cementing3", "Evaluation"];
+
+var responsable = ["Emmanuel", "Hugo", "Mirco", "Jose", "Zhang", "Sebastien",
+"Kurosawa", "Hamza"];
+
+var engineering = ["tool1", "tool2", "tool3", "technic1", "technic2", "agreement1",
+"agreement2"];
+
+var resPlan = [[1, 1, 0, 0, 1, 1, 0, 0],
+ 
+
+var engPlan = [[1, 0, 0, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 1, 0],
+    [0, 0, 1, 0, 0, 1, 0]
+    ];
+
+var numActivity = activityPlan.length;
+var numRespo = responsable.length;
+var numEng = engineering.length;
+
+//console.log(numActivity);
+
+var width = 500;
+var height = 500;
+var svg = d3.select("body")
+             .append("svg")
+             .attr("width", width)
+             .attr("height", height);
+
+
+//var plannings = getPlanRect(activityPlan, [200,150], 10, 100, 20);
+//var ringCenter = plannings[0].ringCenter;
+//var ring = getEngRing(responsable, engineering, ringCenter, 200, 5);
+//var circles = ring[0].concat(ring[1]);
+
+var myMap = getConceptMap(activityPlan, responsable, engineering, resPlan, engPlan,
+                           [200,150], 10, 100, 20, 200, 5);
+
+console.log(myMap);
+
+var plannings = myMap[0];
+var circles = myMap[1];
+var lines = myMap[2];
+
+//console.log(plannings);
+//console.log(ring);
+//console.log(circles);
+
+var gRect = svg.append("g");
+var gRing = svg.append("g");
+var gLine = svg.append("g");
+
+var rect = gRect.selectAll(".myrect")
+                .data(plannings)
+                .enter()
+                .append("rect")
+                .attr("fill","black")
+                .attr("x", function(d){
+                return d.x;
+                })
+                .attr("y", function(d){
+                return d.y;
+                })
+                .attr("width", function(d){
+                return d.length;
+                })
+                .attr("height", function(d){
+                return d.width;
+                })
+                .on("mouseover", fadeRect(0.0))
+                .on("mouseout", fadeRect(1.0));
+
+console.log(rect);
+
+var circle = gRing.selectAll(".mycircle")
+                  .data(circles)
+                  .enter()
+                  .append("circle")
+                  .attr("fill", "green")
+                  .attr("cx", function(d){
+                  return d.xCenter;
+                  })
+                  .attr("cy", function(d){
+                  return d.yCenter;
+                  })
+                  .attr("r", function(d){
+                  return d.rayon;
+                  })
+                  .on("mouseover", fadeRing(0.0))
+                  .on("mouseout", fadeRing(1.0));
+
+console.log(circle);
+
+var line = gLine.selectAll(".myline")
+                .data(lines)
+                .enter()
+                .append("line")
+                .attr("x1", function(d){
+                return d.sourceX;
+                })
+                .attr("y1", function(d){
+                return d.sourceY;
+                })
+                .attr("x2", function(d){
+                return d.targetX;
+                })
+                .attr("y2", function(d){
+                return d.targetY;
+                })
+                .attr("stroke", "red")
+                .attr("stroke-width", "1px");
+
+
+function fadeRect(opacity){
+    return function(g,i){
+
+    gLine.selectAll("line")
+    .filter(function(d){
+
+    return d.sourceName != g.name;
+    })
+    .transition()
+    .style("opacity", opacity);
+
+    };
+}
+
+function fadeRing(opacity){
+    return function(g,i){
+
+    gLine.selectAll("line")
+    .filter(function(d){
+
+    return d.targetName != g.name;
+    })
+    .transition()
+    .style("opacity", opacity);
+
+    };
+}
+
+
+function getConceptMap(activity, responsable, engineering, respoMatrix, engMatrix,
+           origin, padding, long, wide, R, r){
+
+var conceptMap = new Array();
+
+var planRect = getPlanRect(activity, origin, padding, long, wide);
+
+var center = planRect[0].ringCenter;
+
+var ring = getRing(responsable, engineering, center, R, r);
+var ringRespo = ring[0];
+var ringEng = ring[1];
+
+var numRect = activity.length;
+var numRespo = responsable.length;
+var numEng = engineering.length;
+
+var lineRespo = new Array();
+var lineEng = new Array();
+
+// on the left side
+for(var i = 0; i < numRect; i++){
+for(var j = 0; j < numRespo; j++){
+
+if(respoMatrix[i][j] == 1){
+lineRespo.push({sourceName: planRect[i].name,
+sourceX: planRect[i].x,
+sourceY: planRect[i].y,
+targetName: ringRespo[j].name,
+targetX: ringRespo[j].xCenter,
+targetY: ringRespo[j].yCenter,
+});
+}
+}
+}
+
+// on the right side
+for(var k = 0; k < numRect; k++){
+for(var l = 0; l < numEng; l++){
+
+if(engMatrix[k][l] == 1){
+lineEng.push({sourceName: planRect[k].name,
+sourceX: planRect[k].x + long,
+sourceY: planRect[k].y,
+targetName: ringEng[l].name,
+targetX: ringEng[l].xCenter,
+targetY: ringEng[l].yCenter,
+});
+}
+}
+}
+
+conceptMap = [planRect, ringRespo.concat(ringEng), lineRespo.concat(lineEng)];
+return conceptMap;
+
+
+}
+
+
+function getPlanRect(activity, origin, padding, long, wide){
+
+var planRect = new Array();
+var numRect = activity.length;
+
+var ringCenter = [origin[0] + long / 2,
+origin[1] + (wide * numRect + padding * (numRect - 1)) / 2];
+
+for(var i = 0; i < numRect; i++){
+planRect[i] = {name: activity[i],
+x: origin[0],
+y: origin[1] + i * (padding + wide),
+width: wide,
+length: long,
+ringCenter: ringCenter
+};
+
+}
+
+return planRect;
+
+}
+
+function getRing(responsable, engineering, center, R, r){
+
+var ring = new Array();
+
+var numRespo = responsable.length;
+var numEng = engineering.length;
+
+var angleInterRespo = Math.PI / (numRespo + 1);
+var angleInterEng = Math.PI / (numEng + 1);
+
+var engRing = new Array();
+var respoRing = new Array();
+
+  // on left Ring
+  for(var i = 0; i < numRespo; i++){
+
+  respoRing[i] = {name: responsable[i],
+  xCenter: center[0] - R * Math.sin(angleInterRespo * (i + 1)),
+  yCenter: center[1] - R * Math.cos(angleInterRespo * (i + 1)),
+  rayon: r
+  };
+
+  }
+
+  // on right Ring
+  for(var j = 0; j < numEng; j++){
+
+  engRing[j] = {name: engineering[j],
+  xCenter: center[0] + R * Math.sin(angleInterEng * (j + 1)),
+  yCenter: center[1] - R * Math.cos(angleInterEng * (j + 1)),
+  rayon: r
+  };
+
+  }
+
+  ring = [respoRing, engRing];
+  return ring;
+
+}
+
+
+
+</script>
+
+</body>
+</html>
+
